@@ -122,7 +122,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Stremmer.cs" />
+    <Compile Include="Text.cs" />
+    <Compile Include="RequestVkApi.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

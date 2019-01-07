@@ -16,160 +16,70 @@ namespace ConsoleApplication10
         static void Main(string[] args)
         {
 
-            //Данные авторизации
-            FileStream fin;
-            string login,password;
-            fin = new FileStream("D:/Authorize/login.txt", FileMode.Open);
-            StreamReader fstr_in = new StreamReader(fin);
-            login = fstr_in.ReadLine();
-            fstr_in.Close();
+            string domain = "science_technology";  //tv_nauka,  science_technology
+            string Mydomain = "MyTest6";
+            ulong count = 50;
 
-            fin = new FileStream("D:/Authorize/password.txt", FileMode.Open);
-            fstr_in = new StreamReader(fin);
-            password = fstr_in.ReadLine();
-
-            //
-
-
-            //Авторизация
             var api = new VkApi();
-
-
-            Console.WriteLine("Пожалуйста подождите, идёт авторизация...");
-            api.Authorize(new ApiAuthParams
-            {
-                ApplicationId = 3503091,
-                Login = login,
-                Password = password,
-                Settings = Settings.Wall
-            });
-            Console.WriteLine(api.Token);  
-
-            Console.WriteLine("Авторизация прошла успешно!");
-
-
-// подключаемся с помощью апи вк к группе и получаем посты
-            var news = api.Wall.Get(new VkNet.Model.RequestParams.WallGetParams
-            {
-
-               
-                Domain = "science_technology",
-                Count = 30,
-                Fields = ProfileFields.All
-            });
-
-
-            
-
-            //обявляем переменные для перебора потсов и статей
-            int i = 0, j=0;         
 
             List<string> Link = new List<string>();   // листинг с ссылками на статьи
             List<string> TEXT = new List<string>();   // листинг с текстом  Статей
-
-            foreach (var newwwww in news.WallPosts)   // вычисляем среди всех постов статьи и добавляем их в листинг
+            List<string> MyLink = new List<string>();   // листинг с ссылками на мои статьи
+            List<string> MyTEXT = new List<string>();   // листинг с текстом моих Статей
+            try
             {
+                RequestVkApi request = new RequestVkApi();
+                Text text = new Text();
 
-             if(news.WallPosts[i].Attachment.Type.ToString() == "VkNet.Model.Attachments.Link")
+                request.authorize(out api);  /// Авторизация 
+                request.getWall(ref api, ref Link, ref TEXT, domain, count); // Запрос постов со стены
+                request.getWall(ref api, ref MyLink, ref MyTEXT, Mydomain, count); // Запрос постов со своей стены
+
+
+
+                text.checkArticle(ref Link, ref MyLink); // проверяем, есть ли статья уже в нашей группе
+                text.parsing(ref Link, ref TEXT); // Извлечение текста статьи для анализа
+                text.delServicePartOfSpeech(ref TEXT); // Извлечение текста статьи для анализа
+
+
+                //   request.postWall(ref api, ref Link); // Публикация ссылки на статью в группе
+
+
+
+                // Вывод информации о работе
+                if (Link.Count != 0) {
+
+                    Console.WriteLine("Успешное завершение получения статей. Добавленое " + Link.Count + " Статей");
+                }
+
+                else
                 {
-                    Link.Add(news.WallPosts[i].Attachment.Instance.ToString());
+                    Console.WriteLine("Новые статьи отсутствуют");
                 }
 
 
 
-                i++;
-              
+                   }
+
+                   catch { Console.WriteLine("Получение статей не удалось - ошибка"); }
+
+
+
+
+                Console.ReadKey();
+
+
+
+
+
+
+
+
+
+
+
+
             }
-            // news.WallPosts[i].Attachment.Type   дает определить тип статья это link
-            // news.WallPosts[i].Attachment.Instance   с помощю этого можно получить ссылку на статью
-
-
-
-            // выводим все сслыки на статьи 
-            foreach (var link in Link)
-            {
-
-
-                Console.WriteLine(Link[j]);
-                j++;
-            }
-
-
-            j = 0;
-
-
-            string text;    
-
-            foreach (var link in Link)
-            {
-
-
-                text = null;
-
-                //Парсер для вывода текста
-
-
-                string main_url;
-                HtmlWeb webDoc;
-                HtmlAgilityPack.HtmlDocument doc;
-
-
-                main_url = Link[j];
-                webDoc = new HtmlWeb();
-                webDoc.OverrideEncoding = Encoding.Default;
-                doc = webDoc.Load(main_url);
-
-                HtmlNode Title = doc.DocumentNode.SelectSingleNode("//h1"); // Заголовок
-           
-
-                HtmlNodeCollection par = doc.DocumentNode.SelectNodes("//p"); // Остальной текст
-
-
-                text = Title.InnerText + "\n";
-
-
-
-
-                foreach (var tag in par)
-                {
-
-                    string a;
-                    a = tag.InnerText;
-
-
-
-                    text = text + a +"\n";
-                }
-               
-                TEXT.Add(text);
-
-
-                j++;
-            }
-
-
-
-
-
-            Console.WriteLine(TEXT[2]);
-
-
-
-
-            Console.ReadKey();
-
-       
-
-
-
-
-
-
-
-
-
-
-        }
 
 
 
@@ -182,5 +92,6 @@ namespace ConsoleApplication10
 
 
     }
-}
+    }
+
     
